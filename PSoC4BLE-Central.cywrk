@@ -3,12 +3,13 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="PSoC4BLE-Central" persistent="PSoC4BLE-Central.cywrk" platform="NOT_USED">
-<current_project name=".\centralled.cydsn\centralled.cyprj" />
+<current_project name=".\PROC-Central.cydsn\PROC-Central.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\capsenseled.cydsn\capsenseled.cyprj</v>
 <v>.\centralled.cydsn\centralled.cyprj</v>
+<v>.\PROC-Central.cydsn\PROC-Central.cyprj</v>
 </projects>
 <workspace_id v="16282b18-2515-4fdf-890a-022a58413a5c" />
 <WriteAppVersionLastSavedWith v="4.0.0.432" />
