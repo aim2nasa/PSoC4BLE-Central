@@ -43,7 +43,9 @@ void updateLed()
   	tempHandle.value.val = (uint8 *) &state;
     tempHandle.value.len = 1;
     
-    CyBle_GattcWriteCharacteristicValue(cyBle_connHandle,&tempHandle);
+    CyBle_GattcWriteWithoutResponse(cyBle_connHandle,&tempHandle);
+    
+    // CyBle_GattcWriteCharacteristicValue(cyBle_connHandle,&tempHandle);
 }
 /***************************************************************
  * Function to set the Capsense CCCD to get notifications
