@@ -64,6 +64,9 @@ void updateCapsenseNotification()
     CyBle_GattcWriteCharacteristicValue(cyBle_connHandle,&tempHandle);
 }
 
+CYBLE_GAPC_ADV_REPORT_T* scanReport;
+CYBLE_GATTC_HANDLE_VALUE_NTF_PARAM_T *capsenseNTF;    
+
 /* BLE App Callback Function */
 void CyBle_AppCallback( uint32 eventCode, void *eventParam )
 {
@@ -71,64 +74,79 @@ void CyBle_AppCallback( uint32 eventCode, void *eventParam )
     switch( eventCode )
     {
         case CYBLE_EVT_STACK_ON:
+            UART_UartPutString("CYBLE_EVT_STACK_ON\r\n");
         case CYBLE_EVT_GAP_DEVICE_DISCONNECTED:
             systemMode = SM_SCANNING;
             enabledCapsenseNotifications = 0;
             CyBle_GapcStartScan(CYBLE_SCANNING_FAST); // Start scanning for peripherals
             PWM_WriteCompare(0); PWM_Stop();          // Turn off the LED
-        break;
+            UART_UartPutString("Scanning...\r\n");
+            break;
 
-        CYBLE_GAPC_ADV_REPORT_T* scanReport;
         case CYBLE_EVT_GAPC_SCAN_PROGRESS_RESULT:                     // Advertising packet
+            UART_UartPutString("CYBLE_EVT_GAPC_SCAN_PROGRESS_RESULT...");
             scanReport = (CYBLE_GAPC_ADV_REPORT_T*)eventParam;
-            if(scanReport->dataLen != 29)                             // Number of bytes in ledcapsense advertising packet
+            if(scanReport->dataLen != 29) {                             // Number of bytes in ledcapsense advertising packet
+                UART_UartPutString("scanReport->dataLen != 29\r\n");
                 break;
-            if(memcmp(&CapLedService,&scanReport->data[11],sizeof(CapLedService))) // if service is in packet
+            }
+            if(memcmp(&CapLedService,&scanReport->data[11],sizeof(CapLedService))) { // if service is in packet
+                UART_UartPutString("memcmp(&CapLedService,&scanReport->data[11],sizeof(CapLedService))\r\n");
                 return;
+            }
                   
             // Setup for the connection
             remoteDevice.type = scanReport->peerAddrType;          // setup the BD addr
             memcpy(&remoteDevice.bdAddr,scanReport->peerBdAddr,6); // 6 bytes in BD addr
             systemMode = SM_CONNECTING;
             CyBle_GapcStopScan();                                  // stop scanning for peripherals
-            
-        break;
+            UART_UartPutString("Stop scan\r\n");
+            break;
 
         case CYBLE_EVT_GAPC_SCAN_START_STOP: // If you stopped scanning to make a connection.. then launch connection
             if(systemMode == SM_CONNECTING ) 
                 CyBle_GapcConnectDevice(&remoteDevice);
-        break;
+                
+            UART_UartPutString("CYBLE_EVT_GAPC_SCAN_START_STOP\r\n");
+            break;
 
         case CYBLE_EVT_GAP_DEVICE_CONNECTED:              // Connection request is complete
             CyBle_GattcStartDiscovery(cyBle_connHandle);  // Discover the services on the GATT Server
             systemMode = SM_SERVICEDISCOVERY;
-        break;
+            UART_UartPutString("CYBLE_EVT_GAP_DEVICE_CONNECTED\r\n");
+            break;
             
-
         case CYBLE_EVT_GATT_CONNECT_IND: // nothing to do
-        break;
+            UART_UartPutString("CYBLE_EVT_GATT_CONNECT_IND (do nothing)\r\n");
+            break;
 
         case CYBLE_EVT_GATTC_DISCOVERY_COMPLETE:  // Once you have a conenction set the CCCD and turn on the PWM
             systemMode = SM_CONNECTED;
             updateCapsenseNotification();
             PWM_Start();
-        break;
+            UART_UartPutString("CYBLE_EVT_GATTC_DISCOVERY_COMPLETE\r\n");
+            break;
           
-        CYBLE_GATTC_HANDLE_VALUE_NTF_PARAM_T *capsenseNTF;    
         case CYBLE_EVT_GATTC_HANDLE_VALUE_NTF:                                 // Capsense Notification Recevied
             capsenseNTF = (CYBLE_GATTC_HANDLE_VALUE_NTF_PARAM_T *)eventParam;
-            if(capsenseNTF->handleValPair.value.val[0] == 0xFF)                // Turn off the LED in no touch
+            if(capsenseNTF->handleValPair.value.val[0] == 0xFF) {               // Turn off the LED in no touch
                 PWM_WriteCompare(0);
-            else
+                sprintf(buff,"CYBLE_EVT_GATTC_HANDLE_VALUE_NTF, val=0xff(0)\r\n");
+            }else{
                 PWM_WriteCompare(capsenseNTF->handleValPair.value.val[0]);
-        break;
+                sprintf(buff,"CYBLE_EVT_GATTC_HANDLE_VALUE_NTF, val=0x%x\r\n",capsenseNTF->handleValPair.value.val[0]);
+            }
+            UART_UartPutString(buff);
+            break;
             
         case CYBLE_EVT_GATTC_WRITE_RSP: // Sucesfull write - nothing to do
-        break;
+            UART_UartPutString("CYBLE_EVT_GATTC_WRITE_RSP (do nothing)\r\n");
+            break;
 
         default:
-            UART_UartPutString("BLE: Unhandled event = ");
-        break;
+            sprintf(buff,"BLE: Unhandled event(0x%lx)\r\n",eventCode);
+            UART_UartPutString(buff);
+            break;
     }
 }
 
