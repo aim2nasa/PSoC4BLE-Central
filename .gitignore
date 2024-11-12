@@ -3,6 +3,7 @@
 *.rpt
 *.cyfit
 *_timing.html
+ComponentUpdateLog.txt
 *.arh
 *~
 *.cydsn/Cortex*/*
