@@ -4,6 +4,7 @@
 *.cyfit
 *_timing.html
 ComponentUpdateLog.txt
+*.svd
 *.arh
 *~
 *.cydsn/Cortex*/*
