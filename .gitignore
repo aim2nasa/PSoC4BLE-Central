@@ -1,6 +1,8 @@
 *.log
 *.rossi
 *.rpt
+*.cyfit
+*_timing.html
 *.arh
 *~
 *.cydsn/Cortex*/*
